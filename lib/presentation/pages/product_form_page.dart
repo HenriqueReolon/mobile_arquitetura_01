@@ -31,8 +31,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
     _titleController = TextEditingController(text: widget.product?.title ?? '');
     _priceController = TextEditingController(text: widget.product?.price.toString() ?? '');
     _descriptionController = TextEditingController(text: widget.product?.description ?? '');
-    _categoryController = TextEditingController(text: widget.product?.category ?? 'Electronics');
-    _imageController = TextEditingController(text: widget.product?.image ?? 'https://placeimg.com/640/480/tech');
+    _categoryController = TextEditingController(text: widget.product?.category ?? 'smartphones');
+    _imageController = TextEditingController(text: widget.product?.image ?? 'https://dummyjson.com/image/i/products/1/thumbnail.jpg');
   }
 
   @override
