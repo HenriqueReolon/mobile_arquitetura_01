@@ -6,3 +6,12 @@ class ServerException implements Exception {
   @override
   String toString() => message;
 }
+
+class InvalidCredentialsException implements Exception {
+  final String message;
+
+  InvalidCredentialsException([this.message = 'Usuário ou senha inválidos']);
+
+  @override
+  String toString() => message;
+}

@@ -1,28 +1,60 @@
 import 'package:flutter/material.dart';
 import 'core/api_client.dart';
+import 'core/session_manager.dart';
+import 'data/datasources/auth_remote_datasource.dart';
 import 'data/datasources/product_remote_datasource.dart';
+import 'data/repositories/auth_repository_impl.dart';
 import 'data/repositories/product_repository_impl.dart';
-import 'presentation/pages/home_page.dart';
+import 'domain/repositories/auth_repository.dart';
+import 'domain/repositories/product_repository.dart';
+import 'presentation/pages/login_page.dart';
 
 void main() {
   final apiClient = ApiClient();
-  final remoteDataSource = ProductRemoteDataSource(apiClient: apiClient);
-  final repository = ProductRepositoryImpl(remoteDataSource: remoteDataSource);
+  final sessionManager = SessionManager();
 
-  runApp(MyApp(repository: repository));
+  final productDataSource = ProductRemoteDataSource(apiClient: apiClient);
+  final productRepository = ProductRepositoryImpl(
+    remoteDataSource: productDataSource,
+  );
+
+  final authDataSource = AuthRemoteDataSource(apiClient: apiClient);
+  final authRepository = AuthRepositoryImpl(
+    remoteDataSource: authDataSource,
+    sessionManager: sessionManager,
+  );
+
+  runApp(
+    MyApp(
+      sessionManager: sessionManager,
+      authRepository: authRepository,
+      productRepository: productRepository,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  final ProductRepositoryImpl repository;
+  final SessionManager sessionManager;
+  final AuthRepository authRepository;
+  final ProductRepository productRepository;
 
-  const MyApp({super.key, required this.repository});
+  const MyApp({
+    super.key,
+    required this.sessionManager,
+    required this.authRepository,
+    required this.productRepository,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Atividade 4',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: HomePage(repository: repository),
+      home: LoginPage(
+        authRepository: authRepository,
+        productRepository: productRepository,
+        sessionManager: sessionManager,
+      ),
     );
   }
 }
