@@ -79,7 +79,7 @@ class ProductRemoteDataSource {
       final response = await apiClient.client.put(
         Uri.parse('$_baseUrl/products/${product.id}'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode(product.toJson()),
+        body: json.encode(product.toJson()..remove('id')),
       );
 
       if (response.statusCode == 200) {
