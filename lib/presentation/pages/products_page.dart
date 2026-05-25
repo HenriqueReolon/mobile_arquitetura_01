@@ -7,6 +7,7 @@ import '../../domain/repositories/product_repository.dart';
 import 'login_page.dart';
 import 'product_details_page.dart';
 import 'product_form_page.dart';
+import 'profile_page.dart';
 
 sealed class ProductsState {}
 
@@ -163,6 +164,34 @@ class _ProductsPageState extends State<ProductsPage> {
           ],
         ),
         actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProfilePage(
+                      authRepository: widget.authRepository,
+                    ),
+                  ),
+                );
+              },
+              child: Tooltip(
+                message: 'Ver perfil',
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.white,
+                  backgroundImage: (_currentUser?.image ?? '').isNotEmpty
+                      ? NetworkImage(_currentUser!.image)
+                      : null,
+                  child: (_currentUser?.image ?? '').isEmpty
+                      ? const Icon(Icons.person, color: Colors.blue)
+                      : null,
+                ),
+              ),
+            ),
+          ),
           IconButton(
             tooltip: 'Sair',
             icon: const Icon(Icons.logout),
