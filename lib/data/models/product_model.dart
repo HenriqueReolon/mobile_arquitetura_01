@@ -12,22 +12,18 @@ class ProductModel extends Product {
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     String imageUrl = '';
-    if (json['images'] != null && (json['images'] as List).isNotEmpty) {
+    if (json['thumbnail'] != null && json['thumbnail'].toString().isNotEmpty) {
+      imageUrl = json['thumbnail'].toString();
+    } else if (json['images'] != null && (json['images'] as List).isNotEmpty) {
       imageUrl = json['images'][0].toString();
-      // Clean up Platzi API weird image strings if any
-      if (imageUrl.startsWith('[') && imageUrl.endsWith(']')) {
-        imageUrl = imageUrl.replaceAll(RegExp(r'[\[\]\"]'), '').split(',').first;
-      }
     }
 
     return ProductModel(
-      id: json['id'],
-      title: json['title'],
-      price: json['price'].toDouble(),
-      description: json['description'],
-      category: json['category'] != null && json['category']['name'] != null 
-          ? json['category']['name'].toString() 
-          : 'Unknown',
+      id: json['id'] as int,
+      title: json['title']?.toString() ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      description: json['description']?.toString() ?? '',
+      category: json['category']?.toString() ?? 'Unknown',
       image: imageUrl,
     );
   }
@@ -38,7 +34,8 @@ class ProductModel extends Product {
       'title': title,
       'price': price,
       'description': description,
-      'categoryId': 1,
+      'category': category,
+      'thumbnail': image,
       'images': [image],
     };
   }
