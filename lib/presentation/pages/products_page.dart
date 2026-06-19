@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/favorites_manager.dart';
 import '../../core/session_manager.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/entities/user.dart';
@@ -29,12 +30,14 @@ class ProductsPage extends StatefulWidget {
   final ProductRepository repository;
   final AuthRepository authRepository;
   final SessionManager sessionManager;
+  final FavoritesManager favoritesManager;
 
   const ProductsPage({
     super.key,
     required this.repository,
     required this.authRepository,
     required this.sessionManager,
+    required this.favoritesManager,
   });
 
   @override
@@ -44,6 +47,7 @@ class ProductsPage extends StatefulWidget {
 class _ProductsPageState extends State<ProductsPage> {
   ProductsState _state = ProductsLoading();
   User? _currentUser;
+  bool _showOnlyFavorites = false;
 
   @override
   void initState() {
@@ -128,6 +132,7 @@ class _ProductsPageState extends State<ProductsPage> {
     if (confirmar != true || !mounted) return;
 
     widget.sessionManager.clear();
+    widget.favoritesManager.clear();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
@@ -135,6 +140,7 @@ class _ProductsPageState extends State<ProductsPage> {
           authRepository: widget.authRepository,
           productRepository: widget.repository,
           sessionManager: widget.sessionManager,
+          favoritesManager: widget.favoritesManager,
         ),
       ),
       (route) => false,
@@ -164,6 +170,26 @@ class _ProductsPageState extends State<ProductsPage> {
           ],
         ),
         actions: [
+          ListenableBuilder(
+            listenable: widget.favoritesManager,
+            builder: (context, _) {
+              return IconButton(
+                tooltip: _showOnlyFavorites
+                    ? 'Mostrar todos os produtos'
+                    : 'Mostrar apenas favoritos',
+                icon: Badge(
+                  isLabelVisible: widget.favoritesManager.count > 0,
+                  label: Text('${widget.favoritesManager.count}'),
+                  child: Icon(
+                    _showOnlyFavorites ? Icons.favorite : Icons.favorite_border,
+                  ),
+                ),
+                onPressed: () => setState(
+                  () => _showOnlyFavorites = !_showOnlyFavorites,
+                ),
+              );
+            },
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: GestureDetector(
@@ -211,12 +237,31 @@ class _ProductsPageState extends State<ProductsPage> {
               ),
             ),
           ),
-        ProductsSuccess(:final products) => products.isEmpty
-            ? const Center(child: Text('Nenhum produto encontrado.'))
-            : ListView.builder(
-                itemCount: products.length,
+        ProductsSuccess(:final products) => ListenableBuilder(
+            listenable: widget.favoritesManager,
+            builder: (context, _) {
+              final displayed = _showOnlyFavorites
+                  ? products
+                      .where((p) => widget.favoritesManager.isFavorite(p.id))
+                      .toList()
+                  : products;
+
+              if (displayed.isEmpty) {
+                return Center(
+                  child: Text(
+                    _showOnlyFavorites
+                        ? 'Nenhum produto favoritado.'
+                        : 'Nenhum produto encontrado.',
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                itemCount: displayed.length,
                 itemBuilder: (context, index) {
-                  final product = products[index];
+                  final product = displayed[index];
+                  final isFavorite =
+                      widget.favoritesManager.isFavorite(product.id);
                   return ListTile(
                     leading: Image.network(
                       product.image,
@@ -234,6 +279,19 @@ class _ProductsPageState extends State<ProductsPage> {
                     trailing: Wrap(
                       spacing: -8,
                       children: [
+                        IconButton(
+                          tooltip: isFavorite
+                              ? 'Remover dos favoritos'
+                              : 'Adicionar aos favoritos',
+                          icon: Icon(
+                            isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : null,
+                          ),
+                          onPressed: () =>
+                              widget.favoritesManager.toggle(product.id),
+                        ),
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () async {
@@ -264,13 +322,16 @@ class _ProductsPageState extends State<ProductsPage> {
                           builder: (context) => ProductDetailsPage(
                             repository: widget.repository,
                             productId: product.id,
+                            favoritesManager: widget.favoritesManager,
                           ),
                         ),
                       );
                     },
                   );
                 },
-              ),
+              );
+            },
+          ),
       },
       floatingActionButton: FloatingActionButton(
         onPressed: () async {

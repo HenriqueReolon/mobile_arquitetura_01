@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/exceptions.dart';
+import '../../core/favorites_manager.dart';
 import '../../core/session_manager.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/repositories/product_repository.dart';
@@ -9,12 +10,14 @@ class LoginPage extends StatefulWidget {
   final AuthRepository authRepository;
   final ProductRepository productRepository;
   final SessionManager sessionManager;
+  final FavoritesManager favoritesManager;
 
   const LoginPage({
     super.key,
     required this.authRepository,
     required this.productRepository,
     required this.sessionManager,
+    required this.favoritesManager,
   });
 
   @override
@@ -58,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
             repository: widget.productRepository,
             authRepository: widget.authRepository,
             sessionManager: widget.sessionManager,
+            favoritesManager: widget.favoritesManager,
           ),
         ),
       );

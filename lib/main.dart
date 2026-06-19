@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/api_client.dart';
+import 'core/favorites_manager.dart';
 import 'core/session_manager.dart';
 import 'data/datasources/auth_remote_datasource.dart';
 import 'data/datasources/product_remote_datasource.dart';
@@ -12,6 +13,7 @@ import 'presentation/pages/login_page.dart';
 void main() {
   final apiClient = ApiClient();
   final sessionManager = SessionManager();
+  final favoritesManager = FavoritesManager();
 
   final productDataSource = ProductRemoteDataSource(apiClient: apiClient);
   final productRepository = ProductRepositoryImpl(
@@ -27,6 +29,7 @@ void main() {
   runApp(
     MyApp(
       sessionManager: sessionManager,
+      favoritesManager: favoritesManager,
       authRepository: authRepository,
       productRepository: productRepository,
     ),
@@ -35,12 +38,14 @@ void main() {
 
 class MyApp extends StatelessWidget {
   final SessionManager sessionManager;
+  final FavoritesManager favoritesManager;
   final AuthRepository authRepository;
   final ProductRepository productRepository;
 
   const MyApp({
     super.key,
     required this.sessionManager,
+    required this.favoritesManager,
     required this.authRepository,
     required this.productRepository,
   });
@@ -54,6 +59,7 @@ class MyApp extends StatelessWidget {
         authRepository: authRepository,
         productRepository: productRepository,
         sessionManager: sessionManager,
+        favoritesManager: favoritesManager,
       ),
     );
   }

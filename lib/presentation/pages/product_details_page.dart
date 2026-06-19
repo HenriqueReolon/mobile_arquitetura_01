@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/favorites_manager.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/repositories/product_repository.dart';
 
@@ -19,11 +20,13 @@ class ProductDetailsError extends ProductDetailsState {
 class ProductDetailsPage extends StatefulWidget {
   final ProductRepository repository;
   final int productId;
+  final FavoritesManager favoritesManager;
 
   const ProductDetailsPage({
     super.key,
     required this.repository,
     required this.productId,
+    required this.favoritesManager,
   });
 
   @override
@@ -67,6 +70,26 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          ListenableBuilder(
+            listenable: widget.favoritesManager,
+            builder: (context, _) {
+              final isFavorite =
+                  widget.favoritesManager.isFavorite(widget.productId);
+              return IconButton(
+                tooltip: isFavorite
+                    ? 'Remover dos favoritos'
+                    : 'Adicionar aos favoritos',
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : null,
+                ),
+                onPressed: () =>
+                    widget.favoritesManager.toggle(widget.productId),
+              );
+            },
+          ),
+        ],
       ),
       body: switch (_state) {
         ProductDetailsLoading() => const Center(child: CircularProgressIndicator()),
